@@ -10,7 +10,7 @@ export default function NailTechSection() {
       {/* ── LEFT: Photo ── */}
       <div className="relative w-full md:flex-[0_0_48%] h-72 sm:h-96 md:h-full overflow-hidden">
         <Image
-          src="/experience us.webp"
+          src="/experience us.png"
           alt="Model showcasing serenity rejuvenation"
           fill
           priority

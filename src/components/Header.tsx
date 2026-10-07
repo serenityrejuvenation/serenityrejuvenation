@@ -120,7 +120,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
             src="/logo_light.png"
             alt="Serenity Rejuvenation"
             className="max-h-full"
-            width={130}
+            width={200}
             height={200}
           />
         </Link>
