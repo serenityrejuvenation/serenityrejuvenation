@@ -5,6 +5,9 @@ import { SiteHeader } from "@/components/account/SiteHeader";
 import { AdminDashboardShell } from "@/components/admin-dashboard/AdminDashboardShell";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
+// Force dynamic rendering to avoid build-time database queries
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const startTime = Date.now();
 
