@@ -10,6 +10,7 @@ import { RiInstagramFill } from "react-icons/ri";
 import { SiTiktok } from "react-icons/si";
 import { useProducts } from "./ProductsProvider";
 import { FaFacebook } from "react-icons/fa";
+import { Skeleton } from "./ui/skeleton";
 
 export default function Footer({ variant = "default" }: { variant?: FooterVariant }) {
   const products = useProducts();
@@ -86,18 +87,27 @@ export default function Footer({ variant = "default" }: { variant?: FooterVarian
           <div className="md:col-span-3 flex flex-col gap-5">
             <p className={t.heading}>Services</p>
             <ul className="flex flex-col gap-3">
-              {products.map((product) => {
-                const bookUrl = session?.user
-                  ? `/user-dashboard/book?service=${product.id}`
-                  : `/login?redirect=/user-dashboard/book?service=${product.id}`;
-                return (
-                  <li key={product.id}>
-                    <Link href={bookUrl} className={t.link}>
-                      {product.title}
-                    </Link>
+              {products.length === 0 ? (
+                // Skeleton loaders when products are loading
+                Array.from({ length: 5 }).map((_, i) => (
+                  <li key={i}>
+                    <Skeleton className="h-4 w-32 bg-gray-200 dark:bg-gray-700" />
                   </li>
-                );
-              })}
+                ))
+              ) : (
+                products.map((product) => {
+                  const bookUrl = session?.user
+                    ? `/user-dashboard/book?service=${product.id}`
+                    : `/login?redirect=/user-dashboard/book?service=${product.id}`;
+                  return (
+                    <li key={product.id}>
+                      <Link href={bookUrl} className={t.link}>
+                        {product.title}
+                      </Link>
+                    </li>
+                  );
+                })
+              )}
             </ul>
           </div>
 

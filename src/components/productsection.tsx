@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ThemedHighlighter } from "@/components/home/ThemedHighlighter";
 import { useProducts } from "./ProductsProvider";
+import { Skeleton } from "./ui/skeleton";
 
 /* ── TYPES ── */
 type Product = {
@@ -230,9 +231,22 @@ export default function ProductsSection() {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-          {products.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
-          ))}
+          {products.length === 0 ? (
+            // Skeleton loaders when products are loading
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-(--home-card-bg) dark:bg-gray-800/50 rounded-2xl p-6 h-96">
+                <Skeleton className="h-48 w-full mb-4 rounded-lg" />
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-3" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Skeleton className="h-10 w-full rounded-full" />
+              </div>
+            ))
+          ) : (
+            products.map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i} />
+            ))
+          )}
         </div>
       </div>
     </section>

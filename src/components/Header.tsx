@@ -27,6 +27,7 @@ import {
 import { useProducts } from "@/components/ProductsProvider";
 import UserMenu from "@/components/UserMenu";
 import { getHeaderThemeClasses, type HeaderVariant } from "@/lib/header-home-theme";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Header({ variant = "default" }: { variant?: HeaderVariant }) {
   const products = useProducts();
@@ -54,45 +55,56 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
               </NavigationMenuTrigger>
               <NavigationMenuContent className={t.menuContent}>
                 <div className={cn("grid w-220 grid-cols-3 gap-4 p-6", t.menuGrid)}>
-                  {products.map((service) => {
-                    const price = Number(service.price ?? 0);
-                    const bookUrl = session?.user
-                      ? `/user-dashboard/book?service=${service.id}`
-                      : `/login?redirect=/user-dashboard/book?service=${service.id}`;
-                    return (
-                      <Link
-                        key={service.title}
-                        href={bookUrl}
-                        className={t.serviceCard}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className={t.serviceTitle}>
-                              {service.title}
-                            </h4>
-                            <p className={t.serviceDesc}>
-                              {service.description}
-                            </p>
+                  {products.length === 0 ? (
+                    // Skeleton loaders when products are loading
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800/20">
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-3 w-full mb-1" />
+                        <Skeleton className="h-3 w-3/4" />
+                      </div>
+                    ))
+                  ) : (
+                    products.map((service) => {
+                      const price = Number(service.price ?? 0);
+                      const bookUrl = session?.user
+                        ? `/user-dashboard/book?service=${service.id}`
+                        : `/login?redirect=/user-dashboard/book?service=${service.id}`;
+                      return (
+                        <Link
+                          key={service.title}
+                          href={bookUrl}
+                          className={t.serviceCard}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className={t.serviceTitle}>
+                                {service.title}
+                              </h4>
+                              <p className={t.serviceDesc}>
+                                {service.description}
+                              </p>
+                            </div>
+                            <div className="text-right ml-2 max-w-15">
+                              <p className={t.price}>
+                                {price > 0 ? (
+                                  `$${price.toFixed(0)}`
+                                ) : (
+                                  <Link
+                                    href="/contact"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-xs font-bold italic hover:underline text-purple-600 dark:text-[#efcafe]"
+                                  >
+                                    Contact
+                                  </Link>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right ml-2 max-w-15">
-                            <p className={t.price}>
-                              {price > 0 ? (
-                                `$${price.toFixed(0)}`
-                              ) : (
-                                <Link
-                                  href="/contact"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="text-xs font-bold italic hover:underline"
-                                >
-                                  Contact
-                                </Link>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                        </Link>
+                      );
+                    })
+                  )}
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
@@ -105,7 +117,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                     navigationMenuTriggerStyle(),
                     isHome
                       ? t.menuTrigger
-                      : "text-[#efcafe] hover:bg-[#efcafe]/10",
+                      : "text-gray-900 dark:text-[#efcafe] hover:bg-gray-100 dark:hover:bg-[#efcafe]/10",
                   )}
                 >
                   Gallery
@@ -117,9 +129,16 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
 
         <Link href="/" className="flex items-center space-x-2 mr-18">
           <Image
+            src="/logo_dark.png"
+            alt="Serenity Rejuvenation"
+            className="max-h-full dark:hidden"
+            width={200}
+            height={200}
+          />
+          <Image
             src="/logo_light.png"
             alt="Serenity Rejuvenation"
-            className="max-h-full"
+            className="max-h-full hidden dark:block"
             width={200}
             height={200}
           />
@@ -139,7 +158,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                     "hidden cursor-pointer sm:flex",
                     isHome
                       ? t.ghostBtn
-                      : "text-[#efcafe] hover:bg-[#efcafe]/10",
+                      : "text-gray-900 dark:text-[#efcafe] hover:bg-gray-100 dark:hover:bg-[#efcafe]/10",
                   )}
                 >
                   <User className="mr-2 size-4" />
@@ -154,7 +173,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                     "sm:flex hidden",
                     isHome
                       ? t.primaryBtn
-                      : "bg-[#efcafe] hover:bg-[#f7e0ac]/90 text-[#2d063f]",
+                      : "bg-purple-600 dark:bg-[#efcafe] hover:bg-purple-700 dark:hover:bg-[#f7e0ac]/90 text-white dark:text-[#2d063f]",
                   )}
                 >
                   <LogIn className="mr-2 size-4" />
@@ -174,25 +193,32 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                 className={cn(
                   isHome
                     ? t.ghostBtn
-                    : "text-white! hover:bg-[#efcafe]/10",
+                    : "text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#efcafe]/10",
                 )}
               >
-                <Menu className="size-6 text-white!" />
+                <Menu className="size-6" />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className={cn(t.sheet, "bg-[#2d063f]")}
+              className={t.sheet}
             >
               {/* Header */}
               <div className={t.sheetHeader}>
-                {/* Light mode logo */}
+                {/* Logo for both light and dark mode */}
+                <Image
+                  src="/logo_dark.png"
+                  alt="Serenity Rejuvenation"
+                  width={100}
+                  height={60}
+                  className="object-contain dark:hidden"
+                />
                 <Image
                   src="/logo_light.png"
                   alt="Serenity Rejuvenation"
                   width={100}
                   height={60}
-                  className="object-contain"
+                  className="object-contain hidden dark:block"
                 />
               </div>
 
@@ -206,49 +232,60 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                     </AccordionTrigger>
                     <AccordionContent className="pb-1">
                       <div className="flex flex-col gap-1 px-3">
-                        {products.map((service) => {
-                          const bookUrl = session?.user
-                            ? `/user-dashboard/book?service=${service.id}`
-                            : `/login?redirect=/user-dashboard/book?service=${service.id}`;
-                          return (
-                            <Link
-                              key={service.id}
-                              href={bookUrl}
-                              className={t.mobileServiceCard}
-                            >
-                              <div className="flex items-start justify-between gap-2 mb-1">
-                                <span
-                                  className={cn(
-                                    "text-xs font-medium leading-snug",
-                                    isHome
-                                      ? "text-(--home-text)"
-                                      : "text-[#efcafe]",
-                                  )}
-                                >
-                                  {service.title}
-                                </span>
-                                <span
-                                  className={cn(
-                                    "text-[11px] font-medium whitespace-nowrap pt-px",
-                                    isHome ? "text-(--home-accent)" : "text-[#efcafe]",
-                                  )}
-                                >
-                                  {service.price ? `$${service.price}.00` : "Contact"}
-                                </span>
-                              </div>
-                              <p
-                                className={cn(
-                                  "text-[11px] leading-relaxed line-clamp-2",
-                                  isHome
-                                    ? "text-(--home-text)/55"
-                                    : "text-[#efcafe]/55",
-                                )}
+                        {products.length === 0 ? (
+                          // Skeleton loaders when products are loading
+                          Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800/20">
+                              <Skeleton className="h-3 w-24 mb-1" />
+                              <Skeleton className="h-2 w-16 mb-2" />
+                              <Skeleton className="h-2 w-full" />
+                            </div>
+                          ))
+                        ) : (
+                          products.map((service) => {
+                            const bookUrl = session?.user
+                              ? `/user-dashboard/book?service=${service.id}`
+                              : `/login?redirect=/user-dashboard/book?service=${service.id}`;
+                            return (
+                              <Link
+                                key={service.id}
+                                href={bookUrl}
+                                className={t.mobileServiceCard}
                               >
-                                {service.description}
-                              </p>
-                            </Link>
-                          );
-                        })}
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <span
+                                    className={cn(
+                                      "text-xs font-medium leading-snug",
+                                      isHome
+                                        ? "text-(--home-text)"
+                                        : "text-gray-900 dark:text-[#efcafe]",
+                                    )}
+                                  >
+                                    {service.title}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      "text-[11px] font-medium whitespace-nowrap pt-px",
+                                      isHome ? "text-(--home-accent)" : "text-purple-600 dark:text-[#efcafe]",
+                                    )}
+                                  >
+                                    {service.price ? `$${service.price}.00` : "Contact"}
+                                  </span>
+                                </div>
+                                <p
+                                  className={cn(
+                                    "text-[11px] leading-relaxed line-clamp-2",
+                                    isHome
+                                      ? "text-(--home-text)/55"
+                                      : "text-gray-600 dark:text-[#efcafe]/55",
+                                  )}
+                                >
+                                  {service.description}
+                                </p>
+                              </Link>
+                            );
+                          })
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -272,7 +309,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                       <Button
                         variant="outline"
                         size="sm"
-                        className={cn(t.outlineBtn, "mb-2", "text-white!")}
+                        className={cn(t.outlineBtn, "mb-2")}
                       >
                         <User className="mr-2 size-4" />
                         Dashboard
@@ -282,7 +319,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                       <Button
                         variant="outline"
                         size="sm"
-                        className={cn(t.outlineBtn, "mb-2 text-white!")}
+                        className={cn(t.outlineBtn, "mb-2")}
                       >
                         <User className="mr-2 size-4" />
                         Profile
@@ -293,7 +330,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                       size="sm"
                       onClick={handleSignOut}
                       disabled={isPending}
-                      className={cn("text-white!", t.outlineBtn)}
+                      className={cn(t.outlineBtn)}
                     >
                       <LogOut className="mr-2 size-4" />
                       {isPending ? "Signing out..." : "Sign Out"}
@@ -314,7 +351,7 @@ export default function Header({ variant = "default" }: { variant?: HeaderVarian
                     <Link href="/login" onClick={() => setTimeout(() => {}, 0)}>
                       <Button
                         size="sm"
-                        className={cn("w-full", isHome ? t.primaryBtn : "bg-[#efcafe] hover:bg-[#f7e0ac]/90 text-[#2d063f]")}
+                        className={cn("w-full", isHome ? t.primaryBtn : "bg-purple-600 dark:bg-[#efcafe] hover:bg-purple-700 dark:hover:bg-[#f7e0ac]/90 text-white dark:text-[#2d063f]")}
                       >
                         <LogIn className="mr-2 size-4" />
                         Login

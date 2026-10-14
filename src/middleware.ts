@@ -1,20 +1,25 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 // Routes that require authentication
 const protectedRoutes = ["/user-dashboard", "/admin"];
 // Routes that should redirect authenticated users away
 const authRoutes = ["/login", "/signup", "/log-in"];
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const session = req.auth;
+
+  // Get token without Prisma dependency
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
   // Get authentication state
-  const isLoggedIn = !!session?.user;
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isUser = session?.user?.role === "USER";
+  const isLoggedIn = !!token;
+  const isAdmin = token?.role === "ADMIN";
+  const isUser = token?.role === "USER";
 
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -23,18 +28,6 @@ export default auth((req) => {
 
   // Check if route is auth-only (should redirect authenticated users)
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
-
-  // Debug logging (development only)
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[Middleware] ${pathname}`, {
-      isLoggedIn,
-      isAdmin,
-      isUser,
-      hasSession: !!session,
-      sessionUser: session?.user,
-      userRole: session?.user?.role,
-    });
-  }
 
   // 1. Redirect authenticated users away from auth pages
   if (isLoggedIn && isAuthRoute) {
@@ -69,7 +62,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

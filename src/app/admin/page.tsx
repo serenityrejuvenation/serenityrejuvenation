@@ -6,6 +6,8 @@ import { AdminDashboardShell } from "@/components/admin-dashboard/AdminDashboard
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default async function AdminPage() {
+  const startTime = Date.now();
+
   const [users, bookings, products, counts, inquiries] = await Promise.all([
     prisma.user.findMany({
       where: { role: "USER" },
@@ -46,22 +48,32 @@ export default async function AdminPage() {
     }),
   ]);
 
+  console.log(`[Admin] Initial queries completed in ${Date.now() - startTime}ms`);
+
   const [totalUsers, totalBookings, pending, confirmed, completed, cancelled] = counts;
 
-  // Enrich inquiries with service details
-  const inquiriesWithServices = await Promise.all(
-    inquiries.map(async (inquiry) => {
-      const service = await prisma.product.findUnique({
-        where: { id: inquiry.serviceId },
-        select: { id: true, title: true, description: true, image: true },
-      });
-      return {
-        ...inquiry,
-        service: service || { id: inquiry.serviceId, title: "Unknown Service", description: "" },
-        createdAt: inquiry.createdAt.toISOString(),
-      };
-    })
-  );
+  // Enrich inquiries with service details - fix N+1 query by fetching all services at once
+  const serviceLookupStart = Date.now();
+  const uniqueServiceIds = [...new Set(inquiries.map((i) => i.serviceId))];
+  const services = await prisma.product.findMany({
+    where: { id: { in: uniqueServiceIds } },
+    select: { id: true, title: true, description: true, image: true },
+  });
+
+  const serviceMap = new Map(services.map((s) => [s.id, s]));
+
+  const inquiriesWithServices = inquiries.map((inquiry) => ({
+    ...inquiry,
+    service: serviceMap.get(inquiry.serviceId) || {
+      id: inquiry.serviceId,
+      title: "Unknown Service",
+      description: "",
+    },
+    createdAt: inquiry.createdAt.toISOString(),
+  }));
+
+  console.log(`[Admin] Service lookup completed in ${Date.now() - serviceLookupStart}ms`);
+  console.log(`[Admin] Total page load time: ${Date.now() - startTime}ms`);
 
   return (
     <SidebarProvider>

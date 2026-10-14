@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCached, invalidateCache } from "@/lib/cache";
 
 // GET /api/admin/services - List all services
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
   try {
     // Check for API key authentication first
     const apiKey = request.headers.get('x-api-key');
@@ -17,13 +19,23 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const products = await prisma.product.findMany({
-      orderBy: { title: "asc" },
-    });
+    // Use cache for services (5 minute TTL)
+    const products = await getCached(
+      "admin:services",
+      () =>
+        prisma.product.findMany({
+          orderBy: { title: "asc" },
+        }),
+      5 * 60 * 1000 // 5 minutes
+    );
+
+    const duration = Date.now() - startTime;
+    console.log(`[API] GET /api/admin/services completed in ${duration}ms (cached)`);
 
     return NextResponse.json({ services: products });
   } catch (error) {
-    console.error("Error fetching services:", error);
+    const duration = Date.now() - startTime;
+    console.error(`[API] GET /api/admin/services failed after ${duration}ms:`, error);
     return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 });
   }
 }
@@ -61,6 +73,9 @@ export async function POST(request: NextRequest) {
         requiresInquiry: requiresInquiry || false,
       },
     });
+
+    // Invalidate cache after creating service
+    invalidateCache("admin:services");
 
     return NextResponse.json({ success: true, service: product });
   } catch (error) {
@@ -102,6 +117,9 @@ export async function PATCH(request: NextRequest) {
         ...(requiresInquiry !== undefined && { requiresInquiry }),
       },
     });
+
+    // Invalidate cache after updating service
+    invalidateCache("admin:services");
 
     return NextResponse.json({ success: true, service: updated });
   } catch (error) {
@@ -147,6 +165,9 @@ export async function DELETE(request: NextRequest) {
     await prisma.product.delete({
       where: { id },
     });
+
+    // Invalidate cache after deleting service
+    invalidateCache("admin:services");
 
     return NextResponse.json({ success: true });
   } catch (error) {

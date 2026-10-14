@@ -17,6 +17,9 @@ model Product {
   requiresInquiry Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([title])
 }
 
 // NextAuth v5 models - MongoDB compatible
@@ -103,6 +106,8 @@ model Booking {
   @@index([userId])
   @@index([date])
   @@index([paymentId])
+  @@index([status])
+  @@index([serviceId])
 }
 
 enum BookingStatus {

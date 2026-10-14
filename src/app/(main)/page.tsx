@@ -21,10 +21,10 @@ const Home = () => {
         <div className="mb-10">
           <HeroSection
             images={[
-              "/hero image 1.jpg",
+              "/hero image 1.png",
               "/hero image 2.png",
-              "/hero image 3.jpg",
-              "/hero image 4.jpg",
+              "/hero image 3.png",
+              "/hero image 4.jpeg",
               "/hero image 5.jpeg",
               "/hero image 6.jpg",
             ]}

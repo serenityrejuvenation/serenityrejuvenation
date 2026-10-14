@@ -15,11 +15,12 @@ export default function SpaLoader() {
     window.scrollTo(0, 0);
     document.body.style.overflow = "hidden";
 
-    const fadeTimer = setTimeout(() => setFading(true), 2000);
+    // Reduced delay from 2000ms to 500ms - show briefly for branding, then fade
+    const fadeTimer = setTimeout(() => setFading(true), 500);
     const hideTimer = setTimeout(() => {
       setVisible(false);
       document.body.style.overflow = "";
-    }, 2800);
+    }, 1300);
 
     return () => {
       clearTimeout(fadeTimer);

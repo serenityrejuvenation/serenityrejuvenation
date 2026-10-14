@@ -9,7 +9,6 @@ import SpaLoader from "@/components/loader";
 
 import { ProductsProvider } from "@/components/ProductsProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getProducts } from "@/lib/product";
 
 const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -23,20 +22,23 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const products = await getProducts();
-
+  const startTime = Date.now();
   const session = await auth();
+  console.log(`[Layout] Auth loaded in ${Date.now() - startTime}ms`);
 
   return (
     <html lang="en" suppressHydrationWarning className={`${fontSans.variable} dark`}>
       <body className="antialiased">
       <TooltipProvider>
         <SessionProvider session={session}>
-          <ProductsProvider initialProducts={products}>
-            <SpaLoader />
+          <SpaLoader />
 
-            <LenisProvider>{children}</LenisProvider>
-          </ProductsProvider>
+          <LenisProvider>
+            {/* Products fetched client-side to avoid blocking page load */}
+            <ProductsProvider initialProducts={[]}>
+              {children}
+            </ProductsProvider>
+          </LenisProvider>
         </SessionProvider>
       </TooltipProvider>
       </body>
