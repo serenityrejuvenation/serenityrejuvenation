@@ -22,12 +22,15 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in or after successful login
   useEffect(() => {
+    console.log("[Login] Session state:", { status, hasSession: !!session, user: session?.user });
     if (status === "authenticated" && session?.user) {
+      // Use redirect param if provided, otherwise redirect based on role
       const destination = redirectParam || (session.user.role === "ADMIN" ? "/admin" : "/user-dashboard");
-      console.log("[Login] Already authenticated, redirecting to:", destination);
+      console.log("[Login] Authenticated, redirecting to:", destination);
       router.push(destination);
+      setIsPending(false);
     }
   }, [status, session, redirectParam, router]);
 
@@ -53,12 +56,17 @@ export default function LoginPage() {
         return;
       }
 
-      // Success - get the session to determine redirect
-      // We need to wait a bit for the session to be available
+      // Success - the useEffect will handle redirect when session updates
+      console.log("[Login] Sign in successful, waiting for session update");
+
+      // Fallback: if session doesn't update in 2 seconds, force redirect
       setTimeout(() => {
-        // Force a hard refresh to let middleware handle the redirect
-        window.location.href = redirectParam || "/admin";
-      }, 100);
+        if (status !== "authenticated") {
+          console.log("[Login] Session not updated, forcing redirect");
+          const destination = redirectParam || "/user-dashboard";
+          window.location.href = destination;
+        }
+      }, 2000);
     } catch (err) {
       console.error("[Login] Error:", err);
       setError("Something went wrong. Please try again.");

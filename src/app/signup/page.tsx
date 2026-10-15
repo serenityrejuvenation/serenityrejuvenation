@@ -26,6 +26,14 @@ export default function SignupPage() {
   const [state, formAction, isPending] = useActionState(signup, null);
   const isRedirecting = useRef(false);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      console.log("[Signup] Already authenticated, redirecting to homepage");
+      router.push("/");
+    }
+  }, [status, session, router]);
+
   // Handle successful signup - let middleware handle redirect
   useEffect(() => {
     const handleSignupSuccess = async () => {
