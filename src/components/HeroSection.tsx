@@ -18,7 +18,7 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({
-  images = ["/hero image 3.jpg", "/hero image 2.png", "/hero image 4.png", "/hero image 5.jpeg", "/hero image 6.jpg", "/hero image 1.jpg"],
+  images = ["/hero image 3.jpg", "/hero image 2.png", "/hero image 4.png", "/hero image 1.jpg"],
   delay = 5000,
 }: HeroSectionProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
