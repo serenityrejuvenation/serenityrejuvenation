@@ -25,6 +25,11 @@ const Home = () => {
               "/hero image 2.png",
               "/hero image 3.png",
               "/hero image 4.jpeg",
+              "/hero image 6.jpeg",
+              "/hero image 7.jpeg",
+              "/hero image 8.jpeg",
+              "/hero image 9.jpeg",
+              "/hero image 10.jpeg",
             ]}
             delay={5000}
           />
